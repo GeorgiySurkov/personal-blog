@@ -2,3 +2,4 @@ venv
 *.py[cod]
 .env
 .idea
+app.db

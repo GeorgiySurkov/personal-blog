@@ -1,3 +1,6 @@
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+
 from . import db
 
 tag_post_relation = db.Table(
@@ -22,6 +25,7 @@ class Post(db.Model):
         lazy='subquery',
         backref=db.backref('pages', lazy=True)
     )
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __init__(self, **kwargs):
         if 'html_text' not in kwargs:
@@ -50,3 +54,37 @@ class Tag(db.Model):
         if self.id:
             return f'<Tag {self.id} {self.name}>'
         return f'<Tag {self.name}>'
+
+
+user_user_relation = db.Table(
+    'user_user_relation',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), foreign_key=True),
+    db.Column('subscriber_id', db.Integer, db.ForeignKey('user.id'), foreign_key=True),
+)
+
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    email = db.Column(db.String(128), unique=True, index=True)
+    password_hash = db.Column(db.String(128))
+    subscribers = db.relationship(
+        'User',
+        secondary=user_user_relation,
+        lazy='subquery',
+        backref=db.backref('subscriptions', lazy=True)
+    )
+    posts = db.relationship('Post', backref='author', lazy='dynamic')
+
+    def __repr__(self):
+        if self.id:
+            return f'<User {self.id} {self.username}>'
+        return f'<User {self.username}>'
+
+    def set_password(self, password: str) -> None:
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        return check_password_hash(self.password_hash, password)
