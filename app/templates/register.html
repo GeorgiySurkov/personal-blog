@@ -3,11 +3,11 @@
 {% block content %}
     <div class="container h-100">
         <div class="row h-100 justify-content-center align-items-center">
-            <form action="{{ url_for('login') }}" method="POST"
+            <form action="{{ url_for('register') }}" method="POST"
                   style="width: 322px; padding: 20px">
                 {{ form.csrf_token }}
-                <h3 class="text-center">Войти в аккаунт</h3>
-                {% with errors = get_flashed_messages(category_filter=["login-error"]) %}
+                <h3 class="text-center">Регистрация</h3>
+                {% with errors = get_flashed_messages(category_filter=["register-error"]) %}
                     {% for error in errors %}
                         <div class="alert alert-danger">
                             {{ error }}
@@ -15,10 +15,12 @@
                     {% endfor %}
                 {% endwith %}
                 <div class="form-group">
-                    {{ form.username.label(class="sr-only") }}
+                    {{ form.username.label() }}
                     {{ form.username(class="form-control" + (
                         " is-invalid" if form.username.errors else (" is-valid" if form.username.data else "")
                     ), autofocus='') }}
+                    <small class="form-text text-muted">Латинские буквы, цифры, точкы
+                        или нижнее подчеркивание</small>
                     {% for error in form.username.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
@@ -26,7 +28,18 @@
                     {% endfor %}
                 </div>
                 <div class="form-group">
-                    {{ form.password.label(class="sr-only") }}
+                    {{ form.email.label() }}
+                    {{ form.email(class="form-control" + (
+                        " is-invalid" if form.email.errors else (" is-valid" if form.email.data else "")
+                    )) }}
+                    {% for error in form.email.errors %}
+                        <div class="invalid-feedback">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="form-group">
+                    {{ form.password.label() }}
                     {{ form.password(class="form-control" + (
                         " is-invalid" if form.password.errors else (" is-valid" if form.password.data else "")
                     )) }}
@@ -36,18 +49,18 @@
                         </div>
                     {% endfor %}
                 </div>
-                <div class="form-check">
-                    {{ form.remember_me(class="form-check-input") }}
-                    {{ form.remember_me.label(class="form-check-label" + (
-                        " is-invalid" if form.remember_me.errors else (" is-valid" if form.remember_me.data else "")
+                <div class="form-group">
+                    {{ form.repeat_password.label() }}
+                    {{ form.repeat_password(class="form-control" + (
+                        " is-invalid" if form.repeat_password.errors else (" is-valid" if form.repeat_password.data else "")
                     )) }}
-                    {% for error in form.remember_me.errors %}
+                    {% for error in form.repeat_password.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
                         </div>
                     {% endfor %}
                 </div>
-                <button type="submit" class="btn btn-primary">Войти</button>
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
             </form>
         </div>
     </div>

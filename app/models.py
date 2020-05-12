@@ -1,12 +1,12 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 
-from . import db
+from . import db, login
 
 tag_post_relation = db.Table(
     'tag_post_relation',
-    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), foreign_key=True),
-    db.Column('post_id', db.Integer, db.ForeignKey('post.id'), foreign_key=True)
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True),
+    db.Column('post_id', db.Integer, db.ForeignKey('post.id'), primary_key=True)
 )
 
 
@@ -58,14 +58,14 @@ class Tag(db.Model):
 
 user_user_relation = db.Table(
     'user_user_relation',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), foreign_key=True),
-    db.Column('subscriber_id', db.Integer, db.ForeignKey('user.id'), foreign_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('subscriber_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
 )
 
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), unique=True, index=True)
     email = db.Column(db.String(128), unique=True, index=True)
@@ -74,7 +74,9 @@ class User(db.Model, UserMixin):
         'User',
         secondary=user_user_relation,
         lazy='subquery',
-        backref=db.backref('subscriptions', lazy=True)
+        backref=db.backref('subscriptions', lazy=True),
+        primaryjoin=id == user_user_relation.c.user_id,
+        secondaryjoin=id == user_user_relation.c.subscriber_id
     )
     posts = db.relationship('Post', backref='author', lazy='dynamic')
 
@@ -88,3 +90,8 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
+
+
+@login.user_loader
+def load_user(user_id: str) -> User:
+    return User.query.get(int(user_id))
