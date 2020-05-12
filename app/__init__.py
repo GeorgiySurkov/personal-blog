@@ -11,4 +11,15 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 
+
+def render_field_with_validation_classes(field, **kwargs):
+    if field.errors:
+        kwargs['class'] += " is-invalid"
+    elif field.data:
+        kwargs['class'] += " is-valid"
+    return field(**kwargs)
+
+
+app.jinja_env.globals.update(render_field_with_validation_classes=render_field_with_validation_classes)
+
 from . import models, routes

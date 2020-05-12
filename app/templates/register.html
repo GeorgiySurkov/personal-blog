@@ -16,9 +16,7 @@
                 {% endwith %}
                 <div class="form-group">
                     {{ form.username.label() }}
-                    {{ form.username(class="form-control" + (
-                        " is-invalid" if form.username.errors else (" is-valid" if form.username.data else "")
-                    ), autofocus='') }}
+                    {{ render_field_with_validation_classes(form.username, class="form-control", autofocus="") }}
                     <small class="form-text text-muted">Латинские буквы, цифры, точкы
                         или нижнее подчеркивание</small>
                     {% for error in form.username.errors %}
@@ -29,9 +27,7 @@
                 </div>
                 <div class="form-group">
                     {{ form.email.label() }}
-                    {{ form.email(class="form-control" + (
-                        " is-invalid" if form.email.errors else (" is-valid" if form.email.data else "")
-                    )) }}
+                    {{ render_field_with_validation_classes(form.email, class="form-control") }}
                     {% for error in form.email.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
@@ -40,9 +36,7 @@
                 </div>
                 <div class="form-group">
                     {{ form.password.label() }}
-                    {{ form.password(class="form-control" + (
-                        " is-invalid" if form.password.errors else (" is-valid" if form.password.data else "")
-                    )) }}
+                    {{ render_field_with_validation_classes(form.password, class="form-control") }}
                     {% for error in form.password.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
@@ -51,9 +45,7 @@
                 </div>
                 <div class="form-group">
                     {{ form.repeat_password.label() }}
-                    {{ form.repeat_password(class="form-control" + (
-                        " is-invalid" if form.repeat_password.errors else (" is-valid" if form.repeat_password.data else "")
-                    )) }}
+                    {{ render_field_with_validation_classes(form.repeat_password, class="form-control") }}
                     {% for error in form.repeat_password.errors %}
                         <div class="invalid-feedback">
                             {{ error }}

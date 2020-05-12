@@ -16,9 +16,7 @@
                 {% endwith %}
                 <div class="form-group">
                     {{ form.username.label(class="sr-only") }}
-                    {{ form.username(class="form-control" + (
-                        " is-invalid" if form.username.errors else (" is-valid" if form.username.data else "")
-                    ), autofocus='') }}
+                    {{ render_field_with_validation_classes(form.username, class="form-control", autofocus="") }}
                     {% for error in form.username.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
@@ -27,25 +25,23 @@
                 </div>
                 <div class="form-group">
                     {{ form.password.label(class="sr-only") }}
-                    {{ form.password(class="form-control" + (
-                        " is-invalid" if form.password.errors else (" is-valid" if form.password.data else "")
-                    )) }}
+                    {{ render_field_with_validation_classes(form.password, class="form-control") }}
                     {% for error in form.password.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
                         </div>
                     {% endfor %}
                 </div>
-                <div class="form-check">
-                    {{ form.remember_me(class="form-check-input") }}
-                    {{ form.remember_me.label(class="form-check-label" + (
-                        " is-invalid" if form.remember_me.errors else (" is-valid" if form.remember_me.data else "")
-                    )) }}
+                <div class="form-group">
+                    <div class="form-check">
+                    {{ render_field_with_validation_classes(form.remember_me, class="form-check-input") }}
+                    {{ form.remember_me.label(class="form-check-label") }}
                     {% for error in form.remember_me.errors %}
                         <div class="invalid-feedback">
                             {{ error }}
                         </div>
                     {% endfor %}
+                </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Войти</button>
             </form>
