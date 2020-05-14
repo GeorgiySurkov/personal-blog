@@ -7,7 +7,7 @@ from markdown import markdown
 from . import app, db
 from .forms import LoginForm, RegisterForm, PostForm
 from .models import User, Tag, Post
-from .services import parse_tags
+from .services import parse_tags, list_most_frequent_tags
 
 
 @app.route('/index/')
@@ -107,8 +107,24 @@ def register():
 
 @app.route('/profile/<int:user_id>')
 def profile(user_id: int):
+    menu_items = [
+        {
+            'href': '#',
+            'label': 'Подписки'
+        },
+        {
+            'href': url_for('my_posts', page=1),
+            'label': 'Мои посты'
+        }
+    ]
     user = User.query.get_or_404(user_id)
-    return f"{user.username}'s profile"
+    posts_page = request.args.get('page')
+    if posts_page is None:
+        return redirect(url_for('profile', page=1, user_id=user.id))
+    pagination = user.posts.paginate(int(posts_page), 5, False)
+    most_used_tags = list_most_frequent_tags(user.posts.all())
+    return render_template('profile.html', title=f"{user.username}'s profile", user=user, menu_items=menu_items,
+                           most_used_tags=most_used_tags, pagination=pagination)
 
 
 @app.route('/write_post/', methods=['GET', 'POST'])
@@ -133,8 +149,6 @@ def write_post():
             html_text=html_text,
             author=current_user
         )
-        # db.session.add(post)
-        # db.session.commit()
         tags = parse_tags(form.tags.data)
         for tag in tags:
             tag_record = Tag.query.filter_by(name=tag).first()
@@ -170,6 +184,5 @@ def my_posts():
     if page is None:
         return redirect(url_for('my_posts', page='1'))
     page = int(page)
-    pagination = Post.query.filter_by(author=current_user).paginate(page, 1, False)
+    pagination = Post.query.filter_by(author=current_user).paginate(page, 5, False)
     return render_template('my_posts.html', pagination=pagination, menu_items=menu_items, title='Мои посты')
-

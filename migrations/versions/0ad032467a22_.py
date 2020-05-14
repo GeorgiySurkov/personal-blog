@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: da1225b57f2b
+Revision ID: 0ad032467a22
 Revises: 
-Create Date: 2020-05-10 15:08:15.471359
+Create Date: 2020-05-13 01:58:07.756897
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'da1225b57f2b'
+revision = '0ad032467a22'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,8 +22,10 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
     sa.Column('color', sa.String(length=6), nullable=True),
+    sa.Column('is_bg_dark', sa.Boolean(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
+    op.create_index(op.f('ix_tag_name'), 'tag', ['name'], unique=True)
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=64), nullable=True),
@@ -38,23 +40,24 @@ def upgrade():
     sa.Column('title', sa.String(length=128), nullable=True),
     sa.Column('md_text', sa.Text(), nullable=True),
     sa.Column('html_text', sa.Text(), nullable=True),
-    sa.Column('date_published', sa.DateTime(), nullable=True),
     sa.Column('date_created', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_user_relation',
-    sa.Column('user_id', sa.Integer(), nullable=True, foreign_key=True),
-    sa.Column('subscriber_id', sa.Integer(), nullable=True, foreign_key=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('subscriber_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['subscriber_id'], ['user.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], )
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('user_id', 'subscriber_id')
     )
     op.create_table('tag_post_relation',
-    sa.Column('tag_id', sa.Integer(), nullable=True, foreign_key=True),
-    sa.Column('post_id', sa.Integer(), nullable=True, foreign_key=True),
+    sa.Column('tag_id', sa.Integer(), nullable=False),
+    sa.Column('post_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['post_id'], ['post.id'], ),
-    sa.ForeignKeyConstraint(['tag_id'], ['tag.id'], )
+    sa.ForeignKeyConstraint(['tag_id'], ['tag.id'], ),
+    sa.PrimaryKeyConstraint('tag_id', 'post_id')
     )
     # ### end Alembic commands ###
 
@@ -67,5 +70,6 @@ def downgrade():
     op.drop_index(op.f('ix_user_username'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
+    op.drop_index(op.f('ix_tag_name'), table_name='tag')
     op.drop_table('tag')
     # ### end Alembic commands ###
