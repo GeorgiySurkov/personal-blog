@@ -1,51 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{{ title }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    {% block head %}
-    {% endblock %}
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+  {% block head %}
+  {% endblock %}
 </head>
-<body style="height: 100vh; background-color: #f5f5f5">
+<body style="background-color: #f5f5f5">
 <nav class="navbar fixed-top navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="{{ url_for('index') }}">Микро блог</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-                {% for menu_item in menu_items %}
-                    <li class="nav-item {% if menu_item.active %}active{% endif %}">
-                        <a class="nav-link {% if menu_item.disabled %}disabled{% endif %}" href="{{ menu_item.href }}">
-                            {{ menu_item.label }}
-                        </a>
-                    </li>
-                {% endfor %}
-            </ul>
-            <ul class="navbar-nav">
-                {% if current_user.is_anonymous %}
-                    <li style="margin-right: 10px">
-                        <a class="btn btn-outline-secondary" href="{{ url_for('login') }}">Войти</a>
-                    </li>
-                    <li>
-                        <a class="btn btn-primary" href="{{ url_for('register') }}">Зарегистрироваться</a>
-                    </li>
-                {% else %}
-                    <li style="margin-right: 10px">
-                        <a class="btn btn-outline-secondary" href="{{ url_for('logout') }}">Выйти</a>
-                    </li>
-                    <li>
-                        <a class="btn btn-primary" href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.username }}</a>
-                        {# TODO href for user profile #}
-                    </li>
-                {% endif %}
-            </ul>
-        </div>
+  <div class="container">
+    <a class="navbar-brand" href="{{ url_for('index') }}">Микро блог</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        {% for menu_item in menu_items %}
+          <li class="nav-item {% if menu_item.active %}active{% endif %}">
+            <a class="nav-link {% if menu_item.disabled %}disabled{% endif %}" href="{{ menu_item.href }}">
+              {{ menu_item.label }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+      <ul class="navbar-nav">
+        {% if current_user.is_anonymous %}
+          <li style="margin-right: 10px">
+            <a class="btn btn-outline-secondary" href="{{ url_for('login') }}">Войти</a>
+          </li>
+          <li>
+            <a class="btn btn-primary" href="{{ url_for('register') }}">Зарегистрироваться</a>
+          </li>
+        {% else %}
+          <li style="margin-right: 10px">
+            <a class="btn btn-outline-secondary" href="{{ url_for('logout') }}">Выйти</a>
+          </li>
+          <li>
+            <a class="btn btn-primary"
+               href="{{ url_for('profile', user_id=current_user.id) }}">{{ current_user.username }}</a>
+            {# TODO href for user profile #}
+          </li>
+        {% endif %}
+      </ul>
     </div>
+  </div>
 </nav>
 {% block content %}
 

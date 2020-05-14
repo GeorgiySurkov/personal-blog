@@ -1,4 +1,5 @@
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 from flask_login import UserMixin
 
 from . import db, login
@@ -16,22 +17,15 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))
     md_text = db.Column(db.Text())
-    html_text = db.Column(db.Text(), nullable=True)
-    date_published = db.Column(db.DateTime)
-    date_created = db.Column(db.DateTime)
+    html_text = db.Column(db.Text())
+    date_created = db.Column(db.DateTime, default=datetime.utcnow())
     tags = db.relationship(
         'Tag',
         secondary=tag_post_relation,
         lazy='subquery',
-        backref=db.backref('pages', lazy=True)
+        backref=db.backref('posts', lazy=True)
     )
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __init__(self, **kwargs):
-        if 'html_text' not in kwargs:
-            # TODO convert markdown to html
-            pass
-        super(Post, self).__init__(**kwargs)
 
     def __repr__(self):
         if len(self.md_text) > 15:
@@ -47,8 +41,21 @@ class Tag(db.Model):
     __tablename__ = 'tag'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
-    color = db.Column(db.String(6))  # Represents tag color in hex, for e.g. '#ebac0c' (hash symbol not included)
+    name = db.Column(db.String(64), unique=True, index=True)
+    color = db.Column(db.String(6), default='3e4652')
+    is_bg_dark = db.Column(db.Boolean)
+    # Represents tag color in hex, for e.g. '#ebac0c' (hash symbol not included)
+
+    def __init__(self, *args, **kwargs):
+        if 'is_bg_dark' not in kwargs:
+            if 'color' not in kwargs:
+                color = '3e4652'
+            else:
+                color = kwargs['color']
+            red, green, blue = color[:2], color[2:4], color[4:]
+            red, green, blue = map(lambda x: int(x, 16), [red, green, blue])
+            kwargs['is_bg_dark'] = (red * 0.299 + green * 0.587 + blue * 0.114) <= 186
+        super(Tag, self).__init__(*args, **kwargs)
 
     def __repr__(self):
         if self.id:

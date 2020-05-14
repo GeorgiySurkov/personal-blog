@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block head %}
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+  <div class="container" style="margin-top: 60px">
+    <h1>Редактор поста</h1>
+    <form action="{{ url_for('write_post') }}" method="POST">
+      {{ form.csrf_token() }}
+      <div class="form-row">
+        <div class="col-xl-6 mb-3">
+          {{ form.title.label() }}
+          {{ render_field_with_validation_classes(form.title, class="form-control", autofocus='', placeholder="Домашняя пицца за 30 минут") }}
+        </div>
+        <div class="col-xl-6 mb-3">
+          {{ form.tags.label() }}
+          {{ render_field_with_validation_classes(form.tags, class="form-control", placeholder="Кулинария, Пицца, Готовим дома") }}
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="text">Напишите свой пост. (Мы используем синтаксис markdown, <a
+            href="https://paulradzkov.com/2014/markdown_cheatsheet/" target="_blank">шпаргалка</a> по его
+          использованию)</label>
+        {{ render_field_with_validation_classes(
+                    form.text, class="form-control",
+                    rows=10,
+                    style="font-family: 'DM Mono', monospace",
+                    placeholder="### Ингредиенты  \n- 2 яйца\n- 200г муки\n- 200г томатной пасты"
+                ) }}
+      </div>
+      <button type="submit" class="btn btn-primary">Опубликовать</button>
+    </form>
+  </div>
+{% endblock %}

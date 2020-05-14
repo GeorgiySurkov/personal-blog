@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 import wtforms as wtf
+from wtforms.fields.html5 import DateTimeLocalField
 import wtforms.validators as vlds
-from .validators import UsernameValidator
 
+from .validators import UsernameValidator, TagValidator
 from .models import User
 
 
@@ -22,14 +23,6 @@ class LoginForm(FlaskForm):
         render_kw={'placeholder': 'Пароль'}
     )
     remember_me = wtf.BooleanField('Запомнить меня')
-
-    # def validate_password(self, field):
-    #     if '@' in field.data:  # easy way to check if it is email or username
-    #         user = User.query.filter_by(email=field.data).first()
-    #     else:
-    #         user = User.query.filter_by(username=field.data).first()
-    #     if user is None or not user.check_password(self.password.data):
-    #         vlds.ValidationError('Неправильное имя пользователя или пароль')
 
 
 class RegisterForm(FlaskForm):
@@ -70,3 +63,20 @@ class RegisterForm(FlaskForm):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first() is not None:
             raise vlds.ValidationError('Этот email уже занят')
+
+
+class PostForm(FlaskForm):
+    title = wtf.StringField(
+        'Название',
+        validators=[
+            vlds.DataRequired('Название не может быть пустым'),
+            vlds.Length(max=128, message='Название поста не может быть больше 128 символов')
+        ]
+    )
+    text = wtf.TextAreaField(
+        validators=[vlds.DataRequired('Пост не может быть пустым')]
+    )
+    tags = wtf.StringField(
+        'Список тегов через запятую',
+        validators=[TagValidator()]
+    )
