@@ -1,6 +1,5 @@
-from flask import redirect, url_for, flash, render_template, request
+from flask import redirect, url_for, flash, render_template, request, escape
 from flask_login import current_user, login_user, logout_user, login_required
-from flask_sqlalchemy import Pagination
 from werkzeug.urls import url_parse
 from markdown import markdown
 
@@ -23,7 +22,7 @@ def index():
             'label': 'Мои посты'
         }
     ]
-    return render_template('index.html', menu_items=menu_items)
+    return render_template('index.html', menu_items=menu_items, title="Микро блог")
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -142,7 +141,9 @@ def write_post():
     ]
     form = PostForm()
     if form.validate_on_submit():
-        html_text = markdown(form.text.data)
+        md_text = form.text.data
+        escaped_md_text = escape(md_text)
+        html_text = markdown(escaped_md_text)
         post = Post(
             title=form.title.data,
             md_text=form.text.data,
@@ -186,3 +187,19 @@ def my_posts():
     page = int(page)
     pagination = Post.query.filter_by(author=current_user).paginate(page, 5, False)
     return render_template('my_posts.html', pagination=pagination, menu_items=menu_items, title='Мои посты')
+
+
+@app.route('/post/<int:post_id>')
+def post_view(post_id):
+    menu_items = [
+        {
+            'href': '#',
+            'label': 'Подписки'
+        },
+        {
+            'href': url_for('my_posts', page=1),
+            'label': 'Мои посты'
+        }
+    ]
+    post = Post.query.get_or_404(post_id)
+    return render_template('post.html', post=post, menu_items=menu_items, title=f"{post.title} - Микро блог")

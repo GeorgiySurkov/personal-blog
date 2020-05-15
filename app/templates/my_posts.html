@@ -5,7 +5,7 @@
 {% block content %}
   <div class="container" style="margin-top: 70px">
     <h1>Мои публикации</h1>
-    {{ components.pagination(pagination) }}
+    {{ components.pagination(pagination, 'my_posts') }}
     {% if pagination.items %}
       {% for post in pagination.items %}
         {{ components.post_preview(post) }}
@@ -13,6 +13,6 @@
     {% else %}
       <h3>Похоже, у вас еще нет ни одного поста</h3>
     {% endif %}
-    {{ components.pagination(pagination) }}
+    {{ components.pagination(pagination, 'my_posts') }}
   </div>
 {% endblock %}
