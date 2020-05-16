@@ -1,9 +1,8 @@
-{% macro pagination(pagination, endpoint) %}
+{% macro pagination_view(pagination, endpoint) %}
   <ul class="pagination justify-content-center">
     {% if pagination.has_prev %}
       <li class="page-item">
         <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}">{{ pagination.prev_num }}</a>
-        {# TODO fix link generation for different pages #}
       </li>
     {% endif %}
     <li class="page-item active">
@@ -30,6 +29,7 @@
   <div class="card mb-3">
     <div class="card-header">
       {{ post.title }}
+      <small class="text-muted">{{ moment(post.date_created).calendar() }}</small>
     </div>
     <div class="card-body">
       {% for tag in post.tags %}

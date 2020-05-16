@@ -7,7 +7,7 @@
             <strong class="mr-auto">{{ message.header }}</strong>
           {% endif %}
           {% if message.timestamp %}
-            <small class="text-muted">{{ message.timestamp }}</small>
+            <small class="text-muted">{{ moment(message.timestamp).fromNow() }}</small>
             {# TODO make human readable timestamp #}
           {% endif %}
           <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">

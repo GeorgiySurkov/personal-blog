@@ -1,20 +1,33 @@
 {% extends 'base.html' %}
-{% import 'components.html' as components %}
+
+{% from 'components.html' import pagination_view, tag_view, post_preview with context %}
 
 {% block content %}
   <div class="container" style="margin-top: 70px">
     <h1>{{ user.username }}</h1>
     <p>
       Часто писал публикации с этими тегами:
-      {% for tag in most_used_tags %}
-        {{ components.tag_view(tag) }}
-      {% endfor %}
+      {% if most_used_tags %}
+        {% for tag in most_used_tags %}
+          {{ tag_view(tag) }}
+        {% endfor %}
+      {% else %}
+        Пользователь еще не использовал ни одн тег
+      {% endif %}
     </p>
     <h3>Посты пользователя</h3>
-    {{ components.pagination(pagination, 'profile', user_id=user.id) }}
-    {% for post in pagination.items %}
-      {{ components.post_preview(post) }}
-    {% endfor %}
-    {{ components.pagination(pagination, 'profile', user_id=user.id) }}
+    {% if pagination.pages > 1 %}
+      {{ pagination_view(pagination, 'profile', user_id=user.id) }}
+    {% endif %}
+    {% if pagination.items %}
+      {% for post in pagination.items %}
+        {{ post_preview(post) }}
+      {% endfor %}
+    {% else %}
+      <p>Похоже, у пользователя еще нет публикаций</p>
+    {% endif %}
+    {% if pagination.pages > 1 %}
+      {{ pagination_view(pagination, 'profile', user_id=user.id) }}
+    {% endif %}
   </div>
 {% endblock %}

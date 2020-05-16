@@ -1,15 +1,16 @@
 from flask import redirect, url_for, flash, render_template, request, escape
 from flask_login import current_user, login_user, logout_user, login_required
+from datetime import datetime
 from werkzeug.urls import url_parse
 from markdown import markdown
 
 from . import app, db
-from .forms import LoginForm, RegisterForm, PostForm
+from .forms import LoginForm, RegisterForm, PostForm, SearchPostForm
 from .models import User, Tag, Post
 from .services import parse_tags, list_most_frequent_tags
 
 
-@app.route('/index/')
+@app.route('/index')
 @app.route('/')
 def index():
     menu_items = [
@@ -22,10 +23,19 @@ def index():
             'label': 'Мои посты'
         }
     ]
+    query = request.args.get('q')
+    if query is not None:
+        page = request.args.get('page')
+        if page is None:
+            page = 1
+        page = int(page)
+        pagination = Post.query.filter(Post.title.ilike(f'%{query}%')).paginate(page, 5, True)
+        return render_template('search.html', pagination=pagination, menu_items=menu_items, title=f"Поиск \"{query}\"",
+                               query=query)
     return render_template('index.html', menu_items=menu_items, title="Микро блог")
 
 
-@app.route('/login/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     menu_items = [
         {
@@ -40,7 +50,8 @@ def login():
     if current_user.is_authenticated:
         flash({
             'header': f'Вы уже вошли, {current_user.username}',
-            'body': 'Чтобы войти в другой аккаунт сначала нажмите кнопку "Выйти"'
+            'body': 'Чтобы войти в другой аккаунт сначала нажмите кнопку "Выйти"',
+            'timestamp': datetime.utcnow()
         }, 'toast-info')
         return redirect(url_for('index'))
     form = LoginForm()
@@ -55,7 +66,8 @@ def login():
         login_user(user, remember=form.remember_me.data)
         flash({
             'header': 'Вход',
-            'body': f'Вы успешно вошли в свой аккаунт, {user.username}'
+            'body': f'Вы успешно вошли в свой аккаунт, {user.username}',
+            'timestamp': datetime.utcnow()
         }, 'toast-info')
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
@@ -64,14 +76,14 @@ def login():
     return render_template('login.html', form=form, menu_items=menu_items, title="Войти в аккаунт")
 
 
-@app.route('/logout/', methods=['GET', 'POST'])
+@app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
 
-@app.route('/register/', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     menu_items = [
         {
@@ -86,7 +98,8 @@ def register():
     if current_user.is_authenticated:
         flash({
             'header': f'Вы уже вошли, {current_user.username}',
-            'body': 'Чтобы войти в другой аккаунт сначала нажмите кнопку "Выйти"'
+            'body': 'Чтобы войти в другой аккаунт сначала нажмите кнопку "Выйти"',
+            'timestamp': datetime.utcnow()
         }, 'toast-info')
         return redirect(url_for('index'))
     form = RegisterForm()
@@ -97,7 +110,8 @@ def register():
         db.session.commit()
         flash({
             'header': 'Регистрация',
-            'body': f'Вы успешно зарегистрировались в системе, {user.username}'
+            'body': f'Вы успешно зарегистрировались в системе, {user.username}',
+            'timestamp': datetime.utcnow()
         }, 'toast-info')
         login_user(user)
         return redirect(url_for('index'))
@@ -126,7 +140,7 @@ def profile(user_id: int):
                            most_used_tags=most_used_tags, pagination=pagination)
 
 
-@app.route('/write_post/', methods=['GET', 'POST'])
+@app.route('/write_post', methods=['GET', 'POST'])
 @login_required
 def write_post():
     menu_items = [
@@ -161,13 +175,14 @@ def write_post():
         db.session.commit()
         flash({
             'header': 'Пост',
-            'body': 'Ваш пост успешно сохранен'
+            'body': 'Ваш пост успешно сохранен',
+            'timestamp': datetime.utcnow()
         }, 'toast-info')
         return redirect(url_for('index'))
     return render_template('write_post.html', form=form, title='Редактор поста', menu_items=menu_items)
 
 
-@app.route('/my_posts/')
+@app.route('/my_posts')
 @login_required
 def my_posts():
     menu_items = [
@@ -203,3 +218,4 @@ def post_view(post_id):
     ]
     post = Post.query.get_or_404(post_id)
     return render_template('post.html', post=post, menu_items=menu_items, title=f"{post.title} - Микро блог")
+

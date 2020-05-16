@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% from 'components.html' import pagination_view, post_preview with context %}
+
+{% block content %}
+  <div class="container" style="margin-top: 70px">
+    {% if pagination.items %}
+      <h1>Публикации, найденные по запросу "{{ query }}"</h1>
+      {% if pagination.pages > 1 %}
+        {{ pagination_view(pagination, 'index', q=query) }}
+      {% endif %}
+      {% for post in pagination.items %}
+        {{ post_preview(post) }}
+      {% endfor %}
+      {% if pagination.pages > 1 %}
+        {{ pagination_view(pagination, 'index', q=query) }}
+      {% endif %}
+    {% else %}
+      <h1>По запросу "{{ query }}" ничего не найдено</h1>
+    {% endif %}
+  </div>
+{% endblock %}

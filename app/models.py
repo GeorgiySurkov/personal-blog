@@ -28,13 +28,13 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     def __repr__(self):
-        if len(self.md_text) > 15:
-            showed_part = f'{self.md_text[:15]}...'
-        else:
-            showed_part = self.md_text
+        # if len(self.md_text) > 10:
+        #     showed_part = f'{self.md_text[:10]}...'
+        # else:
+        #     showed_part = self.md_text
         if self.id:
-            return f'<Post {self.id} {showed_part}>'
-        return f'<Post {showed_part}>'
+            return f'<Post {self.id} {self.title}>'
+        return f'<Post {self.title}>'
 
 
 class Tag(db.Model):

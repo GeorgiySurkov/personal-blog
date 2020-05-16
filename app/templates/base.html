@@ -26,25 +26,29 @@
           </li>
         {% endfor %}
       </ul>
-      <ul class="navbar-nav">
+      <div class="d-flex">
+        <form class="form-inline" method="GET" action="{{ url_for('index') }}">
+          <input type="hidden" name="page" value="1">
+          <input type="search" name="q" class="form-control mr-sm-2" placeholder="Поиск">
+          <button type="submit" class="btn btn-outline-success mr-2 my-2 my-sm-0">&#128269;</button>
+        </form>
         {% if current_user.is_anonymous %}
-          <li style="margin-right: 10px">
+          <div class="mr-2">
             <a class="btn btn-outline-secondary" href="{{ url_for('login') }}">Войти</a>
-          </li>
-          <li>
+          </div>
+          <div>
             <a class="btn btn-primary" href="{{ url_for('register') }}">Зарегистрироваться</a>
-          </li>
+          </div>
         {% else %}
-          <li style="margin-right: 10px">
+          <div class="mr-2">
             <a class="btn btn-outline-secondary" href="{{ url_for('logout') }}">Выйти</a>
-          </li>
-          <li>
+          </div>
+          <div>
             <a class="btn btn-primary"
                href="{{ url_for('profile', page=1, user_id=current_user.id) }}">{{ current_user.username }}</a>
-            {# TODO href for user profile #}
-          </li>
+          </div>
         {% endif %}
-      </ul>
+      </div>
     </div>
   </div>
 </nav>
@@ -53,18 +57,18 @@
 {% endblock %}
 {% include 'toasts.html' %}
 {% block scripts %}
-
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+          integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+          integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+          crossorigin="anonymous"></script>
+  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+  <script>
+      $('.toast').toast('show');
+  </script>
+  {{ moment.include_moment() }}
+  {{ moment.lang('ru') }}
 {% endblock %}
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-<script>
-    $('.toast').toast('show');
-</script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
 </body>
 </html>
