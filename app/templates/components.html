@@ -2,7 +2,8 @@
   <ul class="pagination justify-content-center">
     {% if pagination.has_prev %}
       <li class="page-item">
-        <a class="page-link" href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}">{{ pagination.prev_num }}</a>
+        <a class="page-link"
+           href="{{ url_for(endpoint, page=pagination.prev_num, **kwargs) }}">{{ pagination.prev_num }}</a>
       </li>
     {% endif %}
     <li class="page-item active">
@@ -10,7 +11,8 @@
     </li>
     {% if pagination.has_next %}
       <li class="page-item">
-        <a class="page-link" href="{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}">{{ pagination.next_num }}</a>
+        <a class="page-link"
+           href="{{ url_for(endpoint, page=pagination.next_num, **kwargs) }}">{{ pagination.next_num }}</a>
       </li>
     {% endif %}
   </ul>
@@ -28,10 +30,10 @@
 {% macro post_preview(post) %}
   <div class="card mb-3">
     <div class="card-header">
-      {{ post.title }}
-      <small class="text-muted">{{ moment(post.date_created).calendar() }}</small>
+      <h5>{{ post.title }} <small class="text-muted">{{ moment(post.date_created).calendar() }}</small></h5>
     </div>
     <div class="card-body">
+      <h6>Автор: <a href="{{ url_for('profile', user_id=post.author.id) }}">{{ post.author.username }}</a></h6>
       {% for tag in post.tags %}
         {{ tag_view(tag) }}
       {% endfor %}
@@ -39,4 +41,18 @@
       <a href="{{ url_for('post_view', post_id=post.id) }}">Читать</a> {# TODO make post link #}
     </div>
   </div>
+{% endmacro %}
+
+{% macro subscribe_button(user) %}
+  {% if current_user in user.subscribers %}
+    <form class="form-inline d-inline" action="{{ url_for('unsubscribe', next=request.path) }}" method="post">
+      <input type="hidden" name="user_id" value="{{ user.id }}">
+      <button type="submit" class="btn btn-secondary">Отписаться</button>
+    </form>
+  {% else %}
+    <form class="form-inline d-inline" action="{{ url_for('subscribe', next=request.path) }}" method="post">
+      <input type="hidden" name="user_id" value="{{ user.id }}">
+      <button type="submit" class="btn btn-danger">Подписаться</button>
+    </form>
+  {% endif %}
 {% endmacro %}

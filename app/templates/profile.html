@@ -1,10 +1,12 @@
 {% extends 'base.html' %}
 
-{% from 'components.html' import pagination_view, tag_view, post_preview with context %}
+{% from 'components.html' import pagination_view, tag_view, post_preview, subscribe_button with context %}
 
 {% block content %}
   <div class="container" style="margin-top: 70px">
-    <h1>{{ user.username }}</h1>
+    <h1>{{ user.username }} {% if current_user != user %}
+      {{ subscribe_button(user) }}
+    {% endif %}</h1>
     <p>
       Часто писал публикации с этими тегами:
       {% if most_used_tags %}

@@ -1,4 +1,4 @@
-from flask import redirect, url_for, flash, render_template, request, escape
+from flask import redirect, url_for, flash, render_template, request, escape, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from datetime import datetime
 from werkzeug.urls import url_parse
@@ -219,3 +219,30 @@ def post_view(post_id):
     post = Post.query.get_or_404(post_id)
     return render_template('post.html', post=post, menu_items=menu_items, title=f"{post.title} - Микро блог")
 
+
+@app.route('/subscribe', methods=['POST'])
+def subscribe():
+    user = User.query.get(int(request.form['user_id']))
+    if user is None or current_user == user or current_user in user.subscribers:
+        abort(400)
+    user.subscribers.append(current_user)
+    db.session.add(user)
+    db.session.commit()
+    next_page = request.args.get('next')
+    if not next_page or url_parse(next_page).netloc != '':
+        next_page = url_for('index')
+    return redirect(next_page)
+
+
+@app.route('/unsubscribe', methods=['POST'])
+def unsubscribe():
+    user = User.query.get(int(request.form['user_id']))
+    if user is None or current_user == user or current_user not in user.subscribers:
+        abort(400)
+    user.subscribers.remove(current_user)
+    db.session.add(user)
+    db.session.commit()
+    next_page = request.args.get('next')
+    if not next_page or url_parse(next_page).netloc != '':
+        next_page = url_for('index')
+    return redirect(next_page)
