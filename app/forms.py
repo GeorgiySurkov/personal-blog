@@ -80,9 +80,3 @@ class PostForm(FlaskForm):
         'Список тегов через запятую',
         validators=[TagValidator()]
     )
-
-
-class SearchPostForm(FlaskForm):
-    title = wtf.StringField(
-        'Название'
-    )

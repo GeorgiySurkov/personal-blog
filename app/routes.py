@@ -5,7 +5,7 @@ from werkzeug.urls import url_parse
 from markdown import markdown
 
 from . import app, db
-from .forms import LoginForm, RegisterForm, PostForm, SearchPostForm
+from .forms import LoginForm, RegisterForm, PostForm
 from .models import User, Tag, Post
 from .services import parse_tags, list_most_frequent_tags
 
@@ -15,7 +15,7 @@ from .services import parse_tags, list_most_frequent_tags
 def index():
     menu_items = [
         {
-            'href': '#',
+            'href': url_for('subscriptions'),
             'label': 'Подписки'
         },
         {
@@ -39,7 +39,7 @@ def index():
 def login():
     menu_items = [
         {
-            'href': '#',
+            'href': url_for('subscriptions'),
             'label': 'Подписки'
         },
         {
@@ -87,7 +87,7 @@ def logout():
 def register():
     menu_items = [
         {
-            'href': '#',
+            'href': url_for('subscriptions'),
             'label': 'Подписки'
         },
         {
@@ -122,7 +122,7 @@ def register():
 def profile(user_id: int):
     menu_items = [
         {
-            'href': '#',
+            'href': url_for('subscriptions'),
             'label': 'Подписки'
         },
         {
@@ -145,7 +145,7 @@ def profile(user_id: int):
 def write_post():
     menu_items = [
         {
-            'href': '#',
+            'href': url_for('subscriptions'),
             'label': 'Подписки'
         },
         {
@@ -187,7 +187,7 @@ def write_post():
 def my_posts():
     menu_items = [
         {
-            'href': '#',
+            'href': url_for('subscriptions'),
             'label': 'Подписки'
         },
         {
@@ -208,7 +208,7 @@ def my_posts():
 def post_view(post_id):
     menu_items = [
         {
-            'href': '#',
+            'href': url_for('subscriptions'),
             'label': 'Подписки'
         },
         {
@@ -221,6 +221,7 @@ def post_view(post_id):
 
 
 @app.route('/subscribe', methods=['POST'])
+@login_required
 def subscribe():
     user = User.query.get(int(request.form['user_id']))
     if user is None or current_user == user or current_user in user.subscribers:
@@ -235,6 +236,7 @@ def subscribe():
 
 
 @app.route('/unsubscribe', methods=['POST'])
+@login_required
 def unsubscribe():
     user = User.query.get(int(request.form['user_id']))
     if user is None or current_user == user or current_user not in user.subscribers:
@@ -246,3 +248,21 @@ def unsubscribe():
     if not next_page or url_parse(next_page).netloc != '':
         next_page = url_for('index')
     return redirect(next_page)
+
+
+@app.route('/subscriptions')
+@login_required
+def subscriptions():
+    menu_items = [
+        {
+            'href': url_for('subscriptions'),
+            'label': 'Подписки',
+            'active': True
+        },
+        {
+            'href': url_for('my_posts', page=1),
+            'label': 'Мои посты'
+        }
+    ]
+    user_subscriptions = current_user.subscriptions
+    return render_template('subscriptions.html', subscriptions=user_subscriptions)
