@@ -175,7 +175,8 @@ def profile(user_id: int):
     pagination = user.posts.paginate(int(posts_page), 15, False)
     most_used_tags = list_most_frequent_tags(user.posts.all())
     return render_template('profile.html', title=f"{user.username}'s profile", user=user, menu_items=menu_items,
-                           most_used_tags=most_used_tags, pagination=pagination)
+                           most_used_tags=most_used_tags, pagination=pagination,
+                           subscribers_amount=len(user.subscribers))
 
 
 @app.route('/write_post', methods=['GET', 'POST'])

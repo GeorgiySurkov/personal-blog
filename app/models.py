@@ -18,7 +18,7 @@ class Post(db.Model):
     title = db.Column(db.String(128))
     md_text = db.Column(db.Text())
     html_text = db.Column(db.Text())
-    date_created = db.Column(db.DateTime, default=datetime.utcnow())
+    date_created = db.Column(db.DateTime, default=datetime.utcnow)
     tags = db.relationship(
         'Tag',
         secondary=tag_post_relation,
