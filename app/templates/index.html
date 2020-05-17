@@ -1,8 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <div class="container h-100" style="position: relative">
-    <h1>Привет!</h1>
-    <h2>Тут будут посты твоих друзей</h2>
+  <div class="container" style="margin-top: 70px">
+    <h1>Лента публикаций</h1>
+    {% if pagination.pages == 0 %}
+      <h2>Похоже, вы еще ни на кого не подписаны.</h2>
+      <p>Попробуйте найти публикации своих друзей в поиске справа сверху.</p>
+    {% else %}
+      {% if pagination.pages > 1 %}
+        {{ pagination_view(pagination, 'index') }}
+      {% endif %}
+      {% for post in pagination.items %}
+        {{ post_preview(post) }}
+      {% endfor %}
+      {% if pagination.pages > 1 %}
+        {{ pagination_view(pagination, 'index') }}
+      {% endif %}
+    {% endif %}
   </div>
 {% endblock %}

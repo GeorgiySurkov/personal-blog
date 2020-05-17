@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container" style="margin-top: 70px">
+    <div class="jumbotron">
+      <h1 class="display-4">Микро блог</h1>
+      <p class="lead">Сайт, на котором люди могут подписываться на интересных людей, читать их публикации, а также вести
+        собственный блог и находить единомышленников</p>
+      <hr class="my-4">
+      <p>Зарегистрируйся, чтобы воспользоваться сайтом.</p>
+      <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}" role="button">Регистрация</a>
+    </div>
+  </div>
+{% endblock %}

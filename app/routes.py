@@ -6,7 +6,7 @@ from markdown import markdown
 
 from . import app, db
 from .forms import LoginForm, RegisterForm, PostForm
-from .models import User, Tag, Post
+from .models import User, Tag, Post, user_user_relation
 from .services import parse_tags, list_most_frequent_tags
 
 
@@ -21,18 +21,44 @@ def index():
         {
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию'
         }
     ]
     query = request.args.get('q')
     if query is not None:
         page = request.args.get('page')
         if page is None:
-            page = 1
+            return redirect(url_for('index', q=query, page=1))
         page = int(page)
-        pagination = Post.query.filter(Post.title.ilike(f'%{query}%')).paginate(page, 5, True)
-        return render_template('search.html', pagination=pagination, menu_items=menu_items, title=f"Поиск \"{query}\"",
-                               query=query)
-    return render_template('index.html', menu_items=menu_items, title="Микро блог")
+        pagination = Post.query.filter(
+            Post.title.ilike(f'%{query}%')
+        ).order_by(
+            Post.date_created.desc()
+        ).paginate(
+            page, 15, True
+        )
+        return render_template(
+            'search.html', pagination=pagination,
+            menu_items=menu_items, title=f"Поиск \"{query}\"",
+            query=query
+        )
+    page = request.args.get('page')
+    if page is None:
+        return redirect(url_for('index', page=1))
+    page = int(page)
+    if current_user.is_anonymous:
+        return render_template('welcome_page.html', menu_items=menu_items, title='Микро блог')
+    pagination = Post.query.join(
+        user_user_relation, (user_user_relation.c.user_id == Post.user_id)
+    ).filter(
+        user_user_relation.c.subscriber_id == current_user.id
+    ).order_by(
+        Post.date_created.desc()
+    ).paginate(page, 15, False)
+    return render_template('index.html', menu_items=menu_items, title="Микро блог", pagination=pagination)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -45,6 +71,10 @@ def login():
         {
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию'
         }
     ]
     if current_user.is_authenticated:
@@ -93,6 +123,10 @@ def register():
         {
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию'
         }
     ]
     if current_user.is_authenticated:
@@ -128,13 +162,17 @@ def profile(user_id: int):
         {
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию'
         }
     ]
     user = User.query.get_or_404(user_id)
     posts_page = request.args.get('page')
     if posts_page is None:
         return redirect(url_for('profile', page=1, user_id=user.id))
-    pagination = user.posts.paginate(int(posts_page), 5, False)
+    pagination = user.posts.paginate(int(posts_page), 15, False)
     most_used_tags = list_most_frequent_tags(user.posts.all())
     return render_template('profile.html', title=f"{user.username}'s profile", user=user, menu_items=menu_items,
                            most_used_tags=most_used_tags, pagination=pagination)
@@ -151,6 +189,11 @@ def write_post():
         {
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию',
+            'active': True
         }
     ]
     form = PostForm()
@@ -194,13 +237,23 @@ def my_posts():
             'active': True,
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию'
         }
     ]
     page = request.args.get('page')
     if page is None:
         return redirect(url_for('my_posts', page='1'))
     page = int(page)
-    pagination = Post.query.filter_by(author=current_user).paginate(page, 5, False)
+    pagination = Post.query.filter_by(
+        author=current_user
+    ).order_by(
+        Post.date_created.desc()
+    ).paginate(
+        page, 15, False
+    )
     return render_template('my_posts.html', pagination=pagination, menu_items=menu_items, title='Мои посты')
 
 
@@ -214,6 +267,10 @@ def post_view(post_id):
         {
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию'
         }
     ]
     post = Post.query.get_or_404(post_id)
@@ -223,7 +280,10 @@ def post_view(post_id):
 @app.route('/subscribe', methods=['POST'])
 @login_required
 def subscribe():
-    user = User.query.get(int(request.form['user_id']))
+    user_id = request.form.get('user_id')
+    if user_id is None:
+        abort(400)
+    user = User.query.get(int(user_id))
     if user is None or current_user == user or current_user in user.subscribers:
         abort(400)
     user.subscribers.append(current_user)
@@ -238,7 +298,10 @@ def subscribe():
 @app.route('/unsubscribe', methods=['POST'])
 @login_required
 def unsubscribe():
-    user = User.query.get(int(request.form['user_id']))
+    user_id = request.form.get('user_id')
+    if user_id is None:
+        abort(400)
+    user = User.query.get(int(user_id))
     if user is None or current_user == user or current_user not in user.subscribers:
         abort(400)
     user.subscribers.remove(current_user)
@@ -262,7 +325,11 @@ def subscriptions():
         {
             'href': url_for('my_posts', page=1),
             'label': 'Мои посты'
+        },
+        {
+            'href': url_for('write_post'),
+            'label': 'Написать публикацию'
         }
     ]
     user_subscriptions = current_user.subscriptions
-    return render_template('subscriptions.html', subscriptions=user_subscriptions)
+    return render_template('subscriptions.html', subscriptions=user_subscriptions, menu_items=menu_items)

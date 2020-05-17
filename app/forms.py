@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
 import wtforms as wtf
-from wtforms.fields.html5 import DateTimeLocalField
 import wtforms.validators as vlds
 
 from .validators import UsernameValidator, TagValidator

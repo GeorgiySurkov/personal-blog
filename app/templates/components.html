@@ -27,13 +27,15 @@
   </span>
 {% endmacro %}
 
-{% macro post_preview(post) %}
+{% macro post_preview(post, author=True) %}
   <div class="card mb-3">
     <div class="card-header">
       <h5>{{ post.title }} <small class="text-muted">{{ moment(post.date_created).calendar() }}</small></h5>
     </div>
     <div class="card-body">
-      <h6>Автор: <a href="{{ url_for('profile', user_id=post.author.id) }}">{{ post.author.username }}</a></h6>
+      {% if author %}
+        <h6>Автор: <a href="{{ url_for('profile', user_id=post.author.id) }}">{{ post.author.username }}</a></h6>
+      {% endif %}
       {% for tag in post.tags %}
         {{ tag_view(tag) }}
       {% endfor %}
